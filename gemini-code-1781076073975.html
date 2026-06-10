@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Expedición Nocturna</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark-bg: #0a0a0a;
+            --scroll-bg: #e2cfa2;
+            --scroll-text: #2c1a0e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body, html {
+            width: 100%; height: 100%;
+            background-color: var(--dark-bg);
+            overflow: hidden;
+            font-family: 'Crimson Text', serif;
+            user-select: none;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 12vh;
+            opacity: 1;
+            transition: opacity 2s ease-in-out;
+            z-index: 10;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Fondos */
+        .bg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+        }
+
+        .bg-img1 {
+            /* REEMPLAZAR AQUÍ LA IMAGEN 1 */
+            background-image: url('data:image/png;base64,TU_IMAGEN_1_BASE64');
+            animation: breathe 4s infinite alternate ease-in-out;
+        }
+
+        .bg-img2 {
+            /* REEMPLAZAR AQUÍ LA IMAGEN 2 */
+            background-image: url('data:image/png;base64,TU_IMAGEN_2_BASE64');
+            animation: bob 3s infinite ease-in-out;
+        }
+
+        /* Animaciones CSS */
+        @keyframes breathe {
+            0% { filter: brightness(1) contrast(1); }
+            100% { filter: brightness(1.1) contrast(1.05); }
+        }
+
+        @keyframes bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes pulseMoon {
+            0% { opacity: 0.2; transform: scale(1); }
+            100% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .glow-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .fire-glow {
+            background: radial-gradient(circle at 50% 80%, rgba(255, 100, 0, 0.3) 0%, transparent 40%);
+            animation: pulseMoon 2s infinite alternate;
+        }
+
+        .moon-glow {
+            background: radial-gradient(circle at 50% 20%, rgba(200, 220, 255, 0.2) 0%, transparent 50%);
+            animation: pulseMoon 4s infinite alternate;
+        }
+
+        /* Canvas para partículas */
+        canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Botones */
+        button {
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            color: var(--gold);
+            background: rgba(10, 10, 10, 0.85);
+            border: 2px solid var(--gold);
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            transition: all 0.3s ease;
+            text-shadow: 0 0 5px #000;
+        }
+
+        button:active {
+            transform: scale(0.95);
+            background: var(--gold);
+            color: var(--dark-bg);
+        }
+
+        /* Pergamino (Modal) */
+        #modal {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            opacity: 1;
+            transition: opacity 0.8s ease;
+        }
+
+        .pergamino {
+            background: var(--scroll-bg);
+            width: 85%;
+            max-width: 400px;
+            padding: 40px 25px;
+            text-align: center;
+            border-radius: 5px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(139, 69, 19, 0.3);
+            border-top: 15px solid #8b4513;
+            border-bottom: 15px solid #8b4513;
+            position: relative;
+        }
+
+        .decor {
+            color: #8b4513;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        h1.cinzel {
+            font-family: 'Cinzel', serif;
+            color: var(--scroll-text);
+            font-size: 1.8rem;
+            letter-spacing: 8px;
+            margin-bottom: 15px;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background: #8b4513;
+            margin: 0 auto 20px auto;
+            width: 60%;
+        }
+
+        p.crimson {
+            font-family: 'Crimson Text', serif;
+            font-size: 1.2rem;
+            color: var(--scroll-text);
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .btn-small {
+            font-size: 0.9rem;
+            padding: 10px 20px;
+            background: transparent;
+            color: #8b4513;
+            border: 1px solid #8b4513;
+            box-shadow: none;
+            text-shadow: none;
+        }
+        
+        .btn-small:active {
+            background: #8b4513;
+            color: var(--scroll-bg);
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="data:audio/mp3;base64,TU_AUDIO_BASE64" type="audio/mp3">
+    </audio>
+
+    <div id="screen1" class="screen">
+        <div class="bg bg-img1"></div>
+        <div class="glow-overlay fire-glow"></div>
+        <canvas id="canvas1"></canvas>
+        <button id="btnPath">⚔ Emprender el camino</button>
+    </div>
+
+    <div id="screen2" class="screen hidden">
+        <div class="bg bg-img2"></div>
+        <div class="glow-overlay moon-glow"></div>
+        <canvas id="canvas2"></canvas>
+        <button id="btnScroll">✦ Leer el pergamino</button>
+    </div>
+
+    <div id="modal" class="hidden">
+        <div class="pergamino">
+            <div class="decor">⚜</div>
+            <h1 class="cinzel">A Y M A</h1>
+            <hr>
+            <p class="crimson"><i>
+                Quedás invitada a unirte a una expedición nocturna bajo las estrellas.<br><br>
+                El terreno: desconocido.<br>
+                El destino: una heladería.<br>
+                La misión: que el destino deje de ponernos excusas.
+            </i></p>
+            <button id="btnClose" class="btn-small">cerrar el pergamino</button>
+        </div>
+    </div>
+
+    <script>
+        // Lógica de navegación
+        const s1 = document.getElementById('screen1');
+        const s2 = document.getElementById('screen2');
+        const modal = document.getElementById('modal');
+        const audio = document.getElementById('bgMusic');
+        let audioStarted = false;
+
+        document.getElementById('btnPath').addEventListener('click', () => {
+            s1.classList.add('hidden');
+            s2.classList.remove('hidden');
+            startAudio();
+        });
+
+        document.getElementById('btnScroll').addEventListener('click', () => {
+            modal.classList.remove('hidden');
+        });
+
+        document.getElementById('btnClose').addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        // Lógica de Audio (Fade in)
+        function startAudio() {
+            if (audioStarted) return;
+            audioStarted = true;
+            audio.volume = 0;
+            
+            audio.play().then(() => {
+                let vol = 0;
+                const fadeInterval = setInterval(() => {
+                    if (vol < 0.55) {
+                        vol += 0.05;
+                        audio.volume = Math.min(vol, 0.55);
+                    } else {
+                        clearInterval(fadeInterval);
+                    }
+                }, 200);
+            }).catch(e => {
+                console.log("Audio bloqueado por el navegador, continuando en silencio.");
+            });
+        }
+
+        // Lógica de Canvas (Partículas)
+        function initCanvas(canvasId, type) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            let w, h;
+            let particles = [];
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            function createParticle() {
+                if (type === 'fire') {
+                    // Chispas de la fogata
+                    return {
+                        x: w / 2 + (Math.random() - 0.5) * 50,
+                        y: h * 0.85,
+                        vx: (Math.random() - 0.5) * 1.5,
+                        vy: Math.random() * -2 - 1,
+                        size: Math.random() * 3 + 1,
+                        life: 1,
+                        maxLife: Math.random() * 100 + 50,
+                        color: Math.random() > 0.5 ? '#ffaa00' : '#ff4400'
+                    };
+                } else {
+                    // Estrellas
+                    return {
+                        x: Math.random() * w,
+                        y: Math.random() * (h * 0.6), // Solo en la mitad superior
+                        size: Math.random() * 1.5 + 0.5,
+                        life: Math.random() * Math.PI * 2, // Usado para el pulso
+                        speed: Math.random() * 0.02 + 0.01,
+                        color: type === 'stars-cold' ? '#e0f0ff' : '#ffffff'
+                    };
+                }
+            }
+
+            // Inicializar estrellas estáticas
+            if (type !== 'fire') {
+                for(let i=0; i<100; i++) particles.push(createParticle());
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+
+                if (type === 'fire') {
+                    // Añadir chispas nuevas
+                    if (Math.random() < 0.3) particles.push(createParticle());
+                    
+                    // Fondo de estrellas parpadeantes en pantalla 1
+                    for(let i=0; i<30; i++) {
+                        let sx = (Math.sin(Date.now() * 0.001 + i) * 0.5 + 0.5) * w;
+                        let sy = (Math.cos(Date.now() * 0.0015 + i) * 0.5 + 0.5) * (h * 0.5);
+                        ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(Math.sin(Date.now()*0.002 + i)) * 0.5})`;
+                        ctx.fillRect(sx, sy, 1.5, 1.5);
+                    }
+                }
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    let p = particles[i];
+
+                    if (type === 'fire') {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.life++;
+                        let opacity = 1 - (p.life / p.maxLife);
+                        
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fillStyle = p.color;
+                        ctx.globalAlpha = opacity > 0 ? opacity : 0;
+                        ctx.fill();
+
+                        if (p.life >= p.maxLife) particles.splice(i, 1);
+                    } else {
+                        // Animación de estrellas (parpadeo)
+                        p.life += p.speed;
+                        let opacity = Math.abs(Math.sin(p.life));
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fillStyle = p.color;
+                        ctx.globalAlpha = opacity;
+                        ctx.fill();
+                    }
+                }
+                ctx.globalAlpha = 1;
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        initCanvas('canvas1', 'fire');
+        initCanvas('canvas2', 'stars-cold');
+    </script>
+</body>
+</html>
